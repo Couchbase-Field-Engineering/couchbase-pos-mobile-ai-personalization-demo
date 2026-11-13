@@ -9,8 +9,8 @@ import { OrderTracker } from '@/src/ui/OrderTracker';
 
 const NEEDS_APPROVAL = new Set(['request_price_match', 'issue_goodwill_credit']);
 const BLURB: Record<string, string> = {
-  request_price_match: 'Customer Care reviews price matches in the Agent Operations Manager before the order is placed. You\'ll see their decision here.',
-  issue_goodwill_credit: 'Goodwill credits are reviewed in the Agent Operations Manager before they land in your store credit.',
+  request_price_match: 'Customer Care reviews price matches in the Couchbase Labs Agent Operations Manager before the order is placed. You\'ll see their decision here.',
+  issue_goodwill_credit: 'Goodwill credits are reviewed in the Couchbase Labs Agent Operations Manager before they land in your store credit.',
   set_subscription: 'The item ships at your member price on the schedule you set, and leaves your smart cart.',
   create_return: 'The refund goes to your store credit right away. Drop the item at any returns desk within 14 days.',
   update_preferences: 'Your recommendations are re-ranked as soon as this syncs.',

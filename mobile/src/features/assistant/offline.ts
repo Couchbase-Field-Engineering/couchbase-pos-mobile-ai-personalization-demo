@@ -4,7 +4,7 @@
  *  1. this shopper's earlier answers (`assistant` doc `answers`, keyed by the normalized question)
  *  2. their recommendations (`recommendations` doc), profile and home store
  *  3. their context cache (`context_cache` docs the server assembled from the
- *     AOM Knowledge Base + tool facts)
+ *     Couchbase Labs Agent Operations Manager Knowledge Base + tool facts)
  *  4. the Shopping Guide FAQ synced in the `catalog` doc
  *
  * Mirrors backend/app/assistant.py's intent keywords so the same question

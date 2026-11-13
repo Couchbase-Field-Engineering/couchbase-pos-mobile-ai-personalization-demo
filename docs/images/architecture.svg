@@ -73,10 +73,10 @@
   <rect x="588" y="124" width="236" height="74" rx="9" class="box"/>
   <text x="602" y="150" class="t">Shopping Assistant</text>
   <text x="602" y="168" class="s">intent → Context Cache (Couchbase)</text>
-  <text x="602" y="184" class="s">→ AOM KB · memory · LLM cache</text>
+  <text x="602" y="184" class="s">→ Couchbase Labs Agent Operations Manager KB · memory · LLM cache</text>
   <rect x="336" y="222" width="236" height="74" rx="9" class="box"/>
   <text x="350" y="248" class="t">Offline-order worker</text>
-  <text x="350" y="266" class="s">pending orders → AOM tools/invoke</text>
+  <text x="350" y="266" class="s">pending orders → Couchbase Labs Agent Operations Manager tools/invoke</text>
   <text x="350" y="282" class="s">polls approvals · writes results</text>
   <rect x="588" y="222" width="236" height="74" rx="9" class="box"/>
   <text x="602" y="248" class="t">MCP server</text>
@@ -85,7 +85,7 @@
   <rect x="336" y="334" width="488" height="58" rx="9" class="box"/>
   <text x="350" y="358" class="t">/api</text>
   <text x="380" y="358" class="s">sign-in (mints Sync Gateway session) · assistant · status</text>
-  <text x="350" y="378" class="s">/pos/mcp  ← called only by AOM</text>
+  <text x="350" y="378" class="s">/pos/mcp  ← called only by Couchbase Labs Agent Operations Manager</text>
 
   <rect x="318" y="460" width="340" height="170" rx="12" fill="#FFFFFF" stroke="#EC1218" stroke-width="1.4"/>
   <text x="334" y="484" class="t">Couchbase Server EE</text>
@@ -108,9 +108,9 @@
   <text x="334" y="722" class="s">channels shopper:&lt;id&gt; + store:&lt;id&gt; + fc:&lt;fc&gt; + catalog</text>
   <text x="334" y="738" class="s">sync fn: phone may only create its own pending orders</text>
 
-  <!-- AOM -->
+  <!-- Couchbase Labs Agent Operations Manager -->
   <rect x="900" y="50" width="320" height="540" rx="14" fill="#F1ECFB" stroke="#B9A6E4"/>
-  <text x="916" y="74" class="h">AGENT OPERATIONS MANAGER</text>
+  <text x="916" y="74" class="h">COUCHBASE LABS AGENT OPERATIONS MANAGER</text>
   <rect x="918" y="90" width="284" height="62" rx="9" class="box"/>
   <text x="932" y="114" class="t">Agent: ShopSmart POS Assistant</text>
   <text x="932" y="132" class="s">role sales_agent · 10 scoped tools</text>
@@ -160,7 +160,7 @@
   <path d="M1204,354 H1226 V716 H1206" stroke="#16357A" stroke-width="1.6" fill="none" stroke-dasharray="5 4" marker-end="url(#ah)"/>
   <!-- 9 worker -> tools/invoke -->
   <path d="M454,298 V314 H876 V440 H914" stroke="#B07F00" stroke-width="2" fill="none" marker-end="url(#ahg)"/>
-  <!-- 10 AOM -> MCP server -->
+  <!-- 10 Couchbase Labs Agent Operations Manager -> MCP server -->
   <path d="M914,470 H886 V259 H828" stroke="#B07F00" stroke-width="2" fill="none" marker-end="url(#ahg)"/>
 
   <!-- badges -->

@@ -189,7 +189,7 @@
       </div>
       <div class="card">
         <div class="rowx"><h2>Kitchen display</h2><span class="tag" id="edgeTag"></span></div>
-        <div class="sub">Tickets reach the kitchen the moment the guest confirms. The order is rung up through AOM when the link allows.</div>
+        <div class="sub">Tickets reach the kitchen the moment the guest confirms. The order is rung up through Couchbase Labs Agent Operations Manager when the link allows.</div>
         <div id="tickets" style="margin-top:6px"></div>
       </div>
     </div>
@@ -204,7 +204,7 @@ const hourLabel = (h) => `${((h + 11) % 12) + 1} ${h < 12 ? 'am' : 'pm'}`;
 const qs = new URLSearchParams(location.search);
 let storeId = qs.get('store') || 'ST-0101', channel = qs.get('channel') === 'phone' ? 'phone' : 'drive_thru';
 let personas = [], sess = null, storeView = null, activePersona = null, busy = false, recog = null, listening = false;
-const STATUS = { on_edge: ['Held at the store · WAN down', 'warn'], pending: ['Sending to AOM', 'info'], processing: ['Ringing up', 'info'],
+const STATUS = { on_edge: ['Held at the store · WAN down', 'warn'], pending: ['Sending to Couchbase Labs Agent Operations Manager', 'info'], processing: ['Ringing up', 'info'],
   confirmed: ['Rung up', 'ok'], partially_shipped: ['Rung up · part shipping later', 'ok'], failed: ['Refused', 'red'], awaiting_approval: ['Awaiting approval', 'warn'] };
 
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2600); }
@@ -311,7 +311,7 @@ async function refreshStore() {
     const bag = (t.bag || []).map((k) => `${k.qty} × ${esc(k.name)}`).join(', ');
     return `<div class="tk"><div class="rowx"><b>${esc(t.title)}</b><span class="tag ${cls}">${label}</span></div>
       <div>${made || '<span class="sub">Nothing to make</span>'}</div>${bag ? `<div class="sub">From the shelf: ${bag}</div>` : ''}
-      ${t.order_id ? `<div class="sub">${esc(t.order_id)} · ${t.governed ? 'governed by AOM' : 'rung up locally (AOM not configured)'}${t.queued_on_edge ? ' · was held at the store' : ''}</div>` : ''}</div>`;
+      ${t.order_id ? `<div class="sub">${esc(t.order_id)} · ${t.governed ? 'governed by Couchbase Labs Agent Operations Manager' : 'rung up locally (Couchbase Labs Agent Operations Manager not configured)'}${t.queued_on_edge ? ' · was held at the store' : ''}</div>` : ''}</div>`;
   }).join('') || '<div class="sub" style="padding-top:8px">No tickets yet this shift.</div>';
 }
 
@@ -361,7 +361,7 @@ function renderSession(newTurn) {
     <span>Offer made</span><span>${tr.offer ? esc(tr.offer.label) : '–'}</span>
     <span>Documents read</span><span class="mono">${sess.reads.map(esc).join('<br>')}</span>
     ${tk ? `<span>Ticket</span><span><span class="tag ${tc}">${tl}</span>${tk.order_id ? ` ${esc(tk.order_id)}` : ''}</span>
-    <span>Governance</span><span>${tk.status === 'on_edge' ? 'Waiting for the link, then through AOM' : tk.governed ? `AOM tools/invoke · trace ${esc(tk.trace_id || '')}` : (tk.status === 'pending' || tk.status === 'processing' ? '…' : 'Ran in-process (AOM not configured)')}</span>
+    <span>Governance</span><span>${tk.status === 'on_edge' ? 'Waiting for the link, then through Couchbase Labs Agent Operations Manager' : tk.governed ? `Couchbase Labs Agent Operations Manager tools/invoke · trace ${esc(tk.trace_id || '')}` : (tk.status === 'pending' || tk.status === 'processing' ? '…' : 'Ran in-process (Couchbase Labs Agent Operations Manager not configured)')}</span>
     ${tk.summary ? `<span>Result</span><span>${esc(tk.summary)}</span>` : ''}` : ''}</div>`;
 }
 

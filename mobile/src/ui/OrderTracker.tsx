@@ -9,7 +9,7 @@ import { openAction } from './nav';
 /**
  * Live status of one offline-first order or shopper action, read from the
  * local database: "On device" -> pushed -> processed by the backend through
- * AOM -> synced back to this card.
+ * Couchbase Labs Agent Operations Manager -> synced back to this card.
  */
 export function OrderTracker({ id, onRetry, onDone, retryLabel = 'Back to cart' }: { id: string; onRetry?: () => void; onDone?: () => void; retryLabel?: string }) {
   const { snap, sync } = useData();
@@ -20,7 +20,7 @@ export function OrderTracker({ id, onRetry, onDone, retryLabel = 'Back to cart' 
   const steps = [
     { label: 'Saved in Couchbase Lite on this phone', done: true },
     { label: sync.status === 'paused' || sync.status === 'offline' ? 'Waiting for a connection…' : 'Synced to ShopSmart through Sync Gateway', done: !q._local },
-    { label: q.governed === false ? 'Processed by the backend (AOM not configured - ungoverned)' : 'Run by the Shopping Assistant agent through Couchbase AOM', done: !waiting },
+    { label: q.governed === false ? 'Processed by the backend (Couchbase Labs Agent Operations Manager not configured - ungoverned)' : 'Run by the Shopping Assistant agent through Couchbase Labs Agent Operations Manager', done: !waiting },
     { label: q.status === 'awaiting_approval' ? 'Waiting for Customer Care approval' : 'Result synced back to this phone', done: !waiting && q.status !== 'awaiting_approval' },
   ];
   const limited = q.status === 'failed' && q.reason_code === 'purchase_limit';
@@ -50,7 +50,7 @@ export function OrderTracker({ id, onRetry, onDone, retryLabel = 'Back to cart' 
           ))}
         </View>
       ) : null}
-      {q.governed ? <Text style={styles.tiny}>Governed by Agent Operations Manager{q.trace_id ? ` · trace ${q.trace_id}` : ''}</Text> : null}
+      {q.governed ? <Text style={styles.tiny}>Governed by Couchbase Labs Agent Operations Manager{q.trace_id ? ` · trace ${q.trace_id}` : ''}</Text> : null}
       {limited ? (
         <Button
           label="Order the rest without it"

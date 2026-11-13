@@ -196,25 +196,25 @@
 <!-- 5 -->
 <section class="chapter" data-title="One data plane for the AI">
   <div class="kicker">Chapter 5 · One data plane for the AI</div>
-  <h2>Databricks produces. <em>Couchbase serves.</em> AOM governs.</h2>
+  <h2>Databricks produces. <em>Couchbase serves.</em> Couchbase Labs Agent Operations Manager governs.</h2>
   <div class="flow" style="grid-template-columns: repeat(4, 1fr)">
     <div class="node dbx"><b>Databricks · 4:30 am</b>One job: Customer 360 joins, next-basket model, price watch, JSON export. Then the warehouse stops.<span class="cost ok">1 run / day</span></div>
     <div class="node cb"><b>Couchbase Server</b>Shoppers, recommendations, catalog, stores, inventory. The assistant's Context Cache copy lives here too.<span class="cost ok">serves all day</span></div>
-    <div class="node aom"><b>Agent Operations Manager</b>Knowledge Base (Shopping Guide + shopper profiles), RAG app, Context Cache, LLM cache, tool governance, approvals.<span class="cost ok">cache first</span></div>
+    <div class="node aom"><b>Couchbase Labs Agent Operations Manager</b>Knowledge Base (Shopping Guide + shopper profiles), RAG app, Context Cache, LLM cache, tool governance, approvals.<span class="cost ok">cache first</span></div>
     <div class="node cb"><b>Couchbase Lite</b>One shopper per phone through Sync Gateway. Orders written here, synced later.<span class="cost ok">offline</span></div>
   </div>
   <div class="grid g4" style="margin-top:22px" id="liveCards">
     <div class="card"><div class="sub">Warehouse queries avoided</div><div class="big live" id="m_wq">-</div><div class="sub">served from Couchbase / Couchbase Lite instead</div></div>
     <div class="card"><div class="sub">Est. Databricks spend avoided</div><div class="big live" id="m_usd">-</div><div class="sub">at <span id="m_rate">-</span> per warehouse / serving call (set DBX_COST_PER_QUERY_USD)</div></div>
-    <div class="card"><div class="sub">Context Cache hit rate</div><div class="big live" id="m_ctx">-</div><div class="sub">AOM Context Cache · <span id="m_turns">-</span> assistant turns</div></div>
+    <div class="card"><div class="sub">Context Cache hit rate</div><div class="big live" id="m_ctx">-</div><div class="sub">Couchbase Labs Agent Operations Manager Context Cache · <span id="m_turns">-</span> assistant turns</div></div>
     <div class="card"><div class="sub">LLM cache hit rate</div><div class="big live" id="m_llm">-</div><div class="sub">exact + semantic hits across shoppers</div></div>
     <div class="card"><div class="sub">Orders captured</div><div class="big live" id="m_orders">-</div><div class="sub"><span id="m_offline">-</span> queued offline first · <span id="m_value">-</span></div></div>
-    <div class="card"><div class="sub">Awaiting Customer Care</div><div class="big live" id="m_appr">-</div><div class="sub">price matches & goodwill credits held by AOM</div></div>
+    <div class="card"><div class="sub">Awaiting Customer Care</div><div class="big live" id="m_appr">-</div><div class="sub">price matches & goodwill credits held by Couchbase Labs Agent Operations Manager</div></div>
     <div class="card"><div class="sub">Export loaded</div><div class="big live" id="m_export">-</div><div class="sub"><span id="m_rows">-</span> shoppers · <span id="m_recs">-</span> recommendation sets</div></div>
     <div class="card"><div class="sub">Model Serving calls avoided</div><div class="big live" id="m_ms">-</div><div class="sub">recommendations read from the export, not scored live</div></div>
   </div>
   <p class="legend" id="liveNote" style="margin-top:10px">Live from <code>/api/status</code>. Use the app and watch these move.</p>
-  <div class="notes"><b>Talking points.</b> Two caches, two bills. AOM's <b>Context Cache</b> keeps the assembled shopper context (profile chunks + smart cart + wallet) keyed by export date and shopper revision, so the second question never re-reads the warehouse <i>or</i> Couchbase. AOM's <b>LLM cache</b> makes the second shopper's identical policy question free. Every number here is a Databricks query that didn't run.</div>
+  <div class="notes"><b>Talking points.</b> Two caches, two bills. Couchbase Labs Agent Operations Manager's <b>Context Cache</b> keeps the assembled shopper context (profile chunks + smart cart + wallet) keyed by export date and shopper revision, so the second question never re-reads the warehouse <i>or</i> Couchbase. Couchbase Labs Agent Operations Manager's <b>LLM cache</b> makes the second shopper's identical policy question free. Every number here is a Databricks query that didn't run.</div>
 </section>
 
 <!-- 6 -->
@@ -239,7 +239,7 @@
       <ul class="clean">
         <li><b>Inventory.</b> 5x normal stock: marked down 15%. One box left: pulled from every promotion, and the bundle it belongs to pauses.</li>
         <li><b>Peak hours.</b> Breakfast items 10% off in the quiet morning; 5% off for store pickup during the evening delivery peak.</li>
-        <li><b>Competitor data.</b> A competitor within 8% of list is matched automatically. A bigger gap goes to Customer Care for approval, through AOM.</li>
+        <li><b>Competitor data.</b> A competitor within 8% of list is matched automatically. A bigger gap goes to Customer Care for approval, through Couchbase Labs Agent Operations Manager.</li>
         <li><b>Bundles.</b> Curated from basket analysis, plus one the engine builds itself around the most overstocked item.</li>
       </ul>
     </div>
@@ -270,10 +270,10 @@
       <span class="tag red">Voice ordering</span>
       <h3 style="margin-top:10px">Drive-thru lane and store phone line</h3>
       <ul class="clean">
-        <li><b>Understands at the store.</b> A grammar over the menu and the catalog reads "two large iced lattes with oat milk and a burrito, no cheese" in under a millisecond. Only what it can't read goes to an LLM, through AOM's cached gateway.</li>
+        <li><b>Understands at the store.</b> A grammar over the menu and the catalog reads "two large iced lattes with oat milk and a burrito, no cheese" in under a millisecond. Only what it can't read goes to an LLM, through Couchbase Labs Agent Operations Manager's cached gateway.</li>
         <li><b>Knows the regular.</b> An app check-in, caller ID or a spoken member number brings the guest's usual, their member price and what the nightly model says they are about to run out of at home.</li>
         <li><b>One offer per turn.</b> Finish the combo, the batch the kitchen overbaked, a larger size, the last box of coffee pods. Every accepted offer is tagged on the order line.</li>
-        <li><b>The order is a ticket.</b> The kitchen sees it the moment the guest says yes. AOM rings it up as the voice agent's own identity.</li>
+        <li><b>The order is a ticket.</b> The kitchen sees it the moment the guest says yes. Couchbase Labs Agent Operations Manager rings it up as the voice agent's own identity.</li>
       </ul>
     </div>
     <div class="card">
@@ -282,7 +282,7 @@
       <ul class="clean">
         <li><b>No barcode hunt.</b> The camera frame becomes a vector; a vector search over the catalog's reference vectors, held on the kiosk, names the item.</li>
         <li><b>Lookalikes.</b> The 72-count and the 120-count box look the same. The bagging scale settles it; with no weight to go on, the kiosk asks the guest instead of guessing.</li>
-        <li><b>Scans that don't add up.</b> A cheaper item's barcode on a dearer item pauses checkout. The attendant's decision is an AOM approval, traced and audited.</li>
+        <li><b>Scans that don't add up.</b> A cheaper item's barcode on a dearer item pauses checkout. The attendant's decision is a Couchbase Labs Agent Operations Manager approval, traced and audited.</li>
         <li><b>A reminder before an attendant.</b> An item that skips the scanner gets "add it?" first. Most of the time that is the end of it.</li>
       </ul>
     </div>
@@ -291,7 +291,7 @@
     <div class="node cb"><b>Couchbase Server</b>Catalog, menu, pricing rules per fulfillment center, shopper profiles and recommendations from the nightly export.<span class="cost ok">one copy of the truth</span></div>
     <div class="node cb"><b>Sync Gateway</b>Channel <code>store:&lt;id&gt;</code>: each store's devices hold that store's rules, tickets and reference vectors.<span class="cost ok">seconds</span></div>
     <div class="node cb"><b>Store edge · Couchbase Lite</b>Lane controller, kiosks and kitchen display keep working with the WAN down. Tickets wait at the store and release when the link returns.<span class="cost ok">0 cloud calls to sell</span></div>
-    <div class="node aom"><b>Agent Operations Manager</b>Three agents, one MCP server. Each agent is scoped to its own tools; orders are traced, exceptions wait for a person.<span class="cost ok">governed</span></div>
+    <div class="node aom"><b>Couchbase Labs Agent Operations Manager</b>Three agents, one MCP server. Each agent is scoped to its own tools; orders are traced, exceptions wait for a person.<span class="cost ok">governed</span></div>
   </div>
   <div class="grid g4" style="margin-top:18px">
     <div class="card"><div class="sub">Voice orders</div><div class="big live" id="p_voice">-</div><div class="sub"><span id="p_ms">-</span> per turn to understand and price</div></div>
@@ -300,7 +300,7 @@
     <div class="card"><div class="sub">Orders held at the store</div><div class="big live" id="p_edge">-</div><div class="sub"><span id="p_exc">-</span> attendant calls · <span id="p_shrink">-</span> shrink prevented</div></div>
   </div>
   <p class="legend" style="margin-top:10px">Open <a href="/lane" target="_blank">voice ordering</a> and <a href="/checkout" target="_blank">self-checkout</a>, cut the WAN link in either, and keep selling.</p>
-  <div class="notes"><b>Talking points.</b> Voice AI and vision at the point of sale usually mean a cloud round trip per utterance and per frame, which is latency in the lane and a dead kiosk when the link drops. Here the agents read documents the store already holds, so a turn is priced in about a millisecond and the store sells through an outage. What still goes to the cloud goes through AOM: the order itself, the LLM for the rare utterance the grammar can't read, and the one decision a machine shouldn't make alone, which is whether a guest scanned the wrong barcode. Show three things: Maya's usual and the coffee-pods offer at the lane, then her phone, where the order and a smaller smart cart have already arrived; the barcode swap at the kiosk, waiting for approval in AOM; and both pages with the WAN link cut.</div>
+  <div class="notes"><b>Talking points.</b> Voice AI and vision at the point of sale usually mean a cloud round trip per utterance and per frame, which is latency in the lane and a dead kiosk when the link drops. Here the agents read documents the store already holds, so a turn is priced in about a millisecond and the store sells through an outage. What still goes to the cloud goes through Couchbase Labs Agent Operations Manager: the order itself, the LLM for the rare utterance the grammar can't read, and the one decision a machine shouldn't make alone, which is whether a guest scanned the wrong barcode. Show three things: Maya's usual and the coffee-pods offer at the lane, then her phone, where the order and a smaller smart cart have already arrived; the barcode swap at the kiosk, waiting for approval in Couchbase Labs Agent Operations Manager; and both pages with the WAN link cut.</div>
 </section>
 
 <!-- 8 -->
@@ -313,11 +313,11 @@
       <tr><td><b>SQL warehouse uptime</b></td><td>Warm around the clock, sized for the evening peak</td><td class="cb">One scheduled job, ~20 min, then auto-stop</td></tr>
       <tr><td><b>Warehouse queries</b></td><td>~12 per session × every session (profile, history, pricing, lookups)</td><td class="cb">0 during the day; the export is read once into Couchbase</td></tr>
       <tr><td><b>Model Serving</b></td><td>Score recommendations per request; endpoint kept hot</td><td class="cb">Scored once in the job; results travel with the export</td></tr>
-      <tr><td><b>Assistant context</b></td><td>Fresh warehouse reads for every question</td><td class="cb">AOM Context Cache + Couchbase copy, invalidated by export date / shopper rev</td></tr>
+      <tr><td><b>Assistant context</b></td><td>Fresh warehouse reads for every question</td><td class="cb">Couchbase Labs Agent Operations Manager Context Cache + Couchbase copy, invalidated by export date / shopper rev</td></tr>
       <tr><td><b>LLM tokens</b></td><td>Every shopper's "how does X work?" is a new call</td><td class="cb">LLM cache: exact and semantic hits across shoppers</td></tr>
       <tr><td><b>Offers, cross-sell, pricing</b></td><td>A recommender call and a pricing call on every cart view</td><td class="cb">Offers and rules sync as documents; the phone computes them</td></tr>
       <tr><td><b>No signal</b></td><td>No home feed, no checkout, an abandoned cart</td><td class="cb">Everything renders and orders are captured from Couchbase Lite</td></tr>
-      <tr><td><b>Governance</b></td><td>Each team wires its own approvals and audit</td><td class="cb">AOM: RBAC, tool scope, approvals, traces, audit for every action</td></tr>
+      <tr><td><b>Governance</b></td><td>Each team wires its own approvals and audit</td><td class="cb">Couchbase Labs Agent Operations Manager: RBAC, tool scope, approvals, traces, audit for every action</td></tr>
       <tr><td><b>Freshness</b></td><td>Live, but a smart cart only needs this morning's scores</td><td class="cb">This morning's export + live order and preference state in Couchbase</td></tr>
     </tbody>
   </table>
@@ -333,7 +333,7 @@
       <h3>Open</h3>
       <ul class="clean">
         <li><a href="/">The app</a> - sign in as a demo shopper (member number + last name are on the sign-in screen)</li>
-        <li><a id="aomLink" href="#" target="_blank">AOM dashboard</a> - Agents, Servers, Knowledge, Context Cache, RAG Applications, Approvals, Traces</li>
+        <li><a id="aomLink" href="#" target="_blank">Couchbase Labs Agent Operations Manager dashboard</a> - Agents, Servers, Knowledge, Context Cache, RAG Applications, Approvals, Traces</li>
         <li><a href="/lane" target="_blank">Voice ordering</a> - the drive-thru lane and the phone line, with the voice agent, the kitchen counts and the WAN lever</li>
         <li><a href="/checkout" target="_blank">Self-checkout</a> - the kiosk with the vision agent, and the attendant's exceptions</li>
         <li><a href="/merch" target="_blank">Merchandising console</a> - live pricing rules, bundles, and levers for stock, the clock and competitor prices</li>
@@ -343,11 +343,11 @@
     <div class="card">
       <h3>Script</h3>
       <ol class="clean" style="padding-left:20px">
-        <li><b>Maya Chen (204817 / Chen).</b> Home shows her smart cart, her two offers and today's deals. Tap her initials and turn on <i>No signal</i>. In the Cart, tap <b>Add ToughLine Tall Kitchen Trash Bags</b> to finish a bundle, then Shop → "mixer" → add it; the Cart offers a <b>price match</b>. Place the order: <b>On device</b>. Ask the assistant "Any deals for me today?" → answered on device. Turn the signal back on, approve the price match in AOM, and the order confirms at the price the phone showed.</li>
+        <li><b>Maya Chen (204817 / Chen).</b> Home shows her smart cart, her two offers and today's deals. Tap her initials and turn on <i>No signal</i>. In the Cart, tap <b>Add ToughLine Tall Kitchen Trash Bags</b> to finish a bundle, then Shop → "mixer" → add it; the Cart offers a <b>price match</b>. Place the order: <b>On device</b>. Ask the assistant "Any deals for me today?" → answered on device. Turn the signal back on, approve the price match in Couchbase Labs Agent Operations Manager, and the order confirms at the price the phone showed.</li>
         <li><b>Merchandising console.</b> With Maya signed in, click <b>Overstock</b> on any item and move the clock to 18: her phone re-prices in seconds and the Cart suggests store pickup for 5% off.</li>
         <li><b>Ask "How does a price match work?" twice.</b> Second time: <i>Context cache · hit</i> and <i>LLM cache · exact hit</i>.</li>
         <li><b>The lane.</b> Open voice ordering and pick Maya: "Good morning, Maya… your usual?" Say yes three times: the usual, the breakfast combo, and the last box of coffee pods the model says she is about to run out of. "That's all", "yes". Her phone's Orders tab now shows the drive-thru order, and the coffee pods have left her smart cart.</li>
-        <li><b>The kiosk.</b> Open self-checkout as a non-member. Run <i>A normal basket</i>, <i>Lookalikes on the scale</i> and <i>The wrong barcode</i>: the last one stops checkout until the attendant decides (in AOM › Approvals when AOM is connected). Cut the WAN link and pay: the ticket waits at the store, and rings up when the link is back.</li>
+        <li><b>The kiosk.</b> Open self-checkout as a non-member. Run <i>A normal basket</i>, <i>Lookalikes on the scale</i> and <i>The wrong barcode</i>: the last one stops checkout until the attendant decides (in Couchbase Labs Agent Operations Manager › Approvals when Couchbase Labs Agent Operations Manager is connected). Cut the WAN link and pay: the ticket waits at the store, and rings up when the link is back.</li>
         <li><b>Devon Walker (318552 / Walker).</b> Rural dead zones. Same policy question → cache hit from Maya's turn. The dog food is out of stock: the order backorders it. Put it on Subscribe & Save.</li>
         <li><b>Sofia Alvarez (427190 / Alvarez).</b> Add the Nova X console: the cart warns about the purchase limit, and the order is refused with <b>purchase_limit</b>. Ask for a goodwill credit (held for approval), then hide Electronics in preferences and watch her picks re-rank.</li>
       </ol>
@@ -406,13 +406,13 @@
     },
     after: {
       title: 'One export a night. Everything else served from Couchbase.',
-      lead: 'Databricks still does the heavy lifting, the Customer 360 join and the next-basket model, once, at 4:30 am. The export lands in Couchbase Server, Sync Gateway puts each shopper\'s documents on their phone, and the assistant answers from AOM\'s Context Cache and Couchbase. The warehouse auto-stops before the first commuter is awake.',
+      lead: 'Databricks still does the heavy lifting, the Customer 360 join and the next-basket model, once, at 4:30 am. The export lands in Couchbase Server, Sync Gateway puts each shopper\'s documents on their phone, and the assistant answers from Couchbase Labs Agent Operations Manager\'s Context Cache and Couchbase. The warehouse auto-stops before the first commuter is awake.',
       flow: `
       <div class="node cb"><b>Shopping app + Couchbase Lite</b>Every screen from the on-device database. Orders written locally.<span class="cost ok">0 queries</span></div>
       <div class="node cb"><b>Sync Gateway</b>One shopper per phone. Push orders, pull confirmations.<span class="cost ok">replication</span></div>
       <div class="node cb"><b>Couchbase Server</b>Shoppers, recommendations, catalog, stores, inventory, order state, loaded once from the export.<span class="cost ok">serves all day</span></div>
       <div class="node dbx"><b>Databricks job · 4:30 am</b>Join + model + JSON export. Warehouse stops at 4:50.<span class="cost ok">1 run / day</span></div>
-      <div class="node aom"><b>AOM</b>Context Cache, LLM cache, KB retrieval, governed tools.<span class="cost ok">cache hits</span></div>`,
+      <div class="node aom"><b>Couchbase Labs Agent Operations Manager</b>Context Cache, LLM cache, KB retrieval, governed tools.<span class="cost ok">cache hits</span></div>`,
       legend: 'One scheduled job. 400,000 sessions × ~12 reads each are served from Couchbase and Couchbase Lite. Warehouse uptime: about 20 minutes.',
       changes: `
       <li>Warehouse runs ~20 minutes a day, then auto-stops</li>
@@ -465,8 +465,8 @@
     `<div class="status ok">Profile, wallet, smart cart and picks render from Couchbase Lite. Instantly, no signal.</div>${rows}`,
     `${rows}<div class="status wait">On device: Brightway Market has the stand mixer for $239.99. Price match saves $26.00 and needs Customer Care.</div>`,
     `${rows}<div class="status ok">Saved to Couchbase Lite · <b>On device</b>. Nothing left to do in the tunnel.</div>`,
-    `${rows}<div class="status wait">Station stairs: replicator pushed the order through Sync Gateway → AOM holds it → <b>Awaiting Customer Care</b>.</div>`,
-    `${rows}<div class="status ok">Customer Care approved in AOM. Worker placed <b>SS-261113-23289</b>. Wallet, history and recommendations updated on the phone; 1 box of coffee pods backordered.</div>`,
+    `${rows}<div class="status wait">Station stairs: replicator pushed the order through Sync Gateway → Couchbase Labs Agent Operations Manager holds it → <b>Awaiting Customer Care</b>.</div>`,
+    `${rows}<div class="status ok">Customer Care approved in Couchbase Labs Agent Operations Manager. Worker placed <b>SS-261113-23289</b>. Wallet, history and recommendations updated on the phone; 1 box of coffee pods backordered.</div>`,
   ];
   const B = [
     `<div class="status muted">Open the app between stations.</div>`,
@@ -517,7 +517,7 @@
       const last = (pr.recent_changes || [])[0];
       if (last) document.getElementById('x_last').textContent = `Latest change by the engine: ${last.text}`;
       if (s.aom && s.aom.dashboard_url) document.getElementById('aomLink').href = s.aom.dashboard_url;
-      document.getElementById('liveNote').textContent = `Live from /api/status · store: ${s.store} · AOM ${s.aom && s.aom.configured ? 'connected' : 'not configured (local fallbacks)'} · ${new Date().toLocaleTimeString()}`;
+      document.getElementById('liveNote').textContent = `Live from /api/status · store: ${s.store} · Couchbase Labs Agent Operations Manager ${s.aom && s.aom.configured ? 'connected' : 'not configured (local fallbacks)'} · ${new Date().toLocaleTimeString()}`;
     } catch (e) {
       document.getElementById('liveNote').textContent = 'Backend not reachable at /api/status yet.';
     }

@@ -190,7 +190,7 @@
     <div class="grid">
       <div class="card">
         <div class="rowx"><h2>Attendant</h2><span class="tag" id="excTag">all clear</span></div>
-        <div class="sub">One attendant, six kiosks. They are called only for what the agent can't settle, and the decision runs through AOM's approval tier.</div>
+        <div class="sub">One attendant, six kiosks. They are called only for what the agent can't settle, and the decision runs through Couchbase Labs Agent Operations Manager's approval tier.</div>
         <div id="exceptions"></div>
       </div>
       <div class="card">
@@ -335,7 +335,7 @@ function render() {
 
   const tk = sess.ticket;
   $('pay').disabled = sess.state !== 'scanning' || sess.blockers.length > 0; $('pay').style.opacity = $('pay').disabled ? .45 : 1;
-  $('payNote').innerHTML = sess.state === 'paid' ? `<b style="color:var(--ok)">${esc(tk.summary || 'Paid')}</b> ${tk.governed ? `· governed by AOM, trace ${esc(tk.trace_id || '')}` : '· rung up locally (AOM not configured)'}${sess.checkout_seconds != null ? ` · ${sess.checkout_seconds}s at the kiosk` : ''}`
+  $('payNote').innerHTML = sess.state === 'paid' ? `<b style="color:var(--ok)">${esc(tk.summary || 'Paid')}</b> ${tk.governed ? `· governed by Couchbase Labs Agent Operations Manager, trace ${esc(tk.trace_id || '')}` : '· rung up locally (Couchbase Labs Agent Operations Manager not configured)'}${sess.checkout_seconds != null ? ` · ${sess.checkout_seconds}s at the kiosk` : ''}`
     : sess.state === 'paying' ? esc(TICKET[tk && tk.status] || 'Paid. Ringing up…')
     : sess.error ? `<b style="color:var(--red)">${esc(sess.error)}</b>` : esc(sess.blockers[0] || '');
 
@@ -352,8 +352,8 @@ function render() {
       : `<b>${esc(e.seen_name)}</b>, ${money(e.seen_price)}. The guest declined the reminder.`;
     const btns = e.status === 'open' ? `<div class="btns"><button class="sm primary" data-x="${e.id}" data-d="charge_as_seen">${e.kind === 'scan_mismatch' ? 'Ring up what\'s on the tray' : 'Add it to the receipt'}</button>
         ${e.kind === 'scan_mismatch' ? `<button class="sm" data-x="${e.id}" data-d="accept_scan">The scan is right</button>` : ''}<button class="sm" data-x="${e.id}" data-d="remove">Take the item back</button></div>`
-      : e.status === 'awaiting_approval' ? `<div class="tag warn" style="margin-top:8px;white-space:normal">Waiting for approval in AOM › Approvals${storeView && storeView.aom.dashboard_url ? ` · <a href="${esc(storeView.aom.dashboard_url)}" target="_blank"><u>open AOM</u></a>` : ''}</div>`
-      : `<div class="sub" style="margin-top:6px">${esc(e.outcome)} · ${esc(e.resolved_by)} · ${e.governed ? `approved in AOM, trace ${esc(e.trace_id || '')}` : 'settled at the store'}</div>`;
+      : e.status === 'awaiting_approval' ? `<div class="tag warn" style="margin-top:8px;white-space:normal">Waiting for approval in Couchbase Labs Agent Operations Manager › Approvals${storeView && storeView.aom.dashboard_url ? ` · <a href="${esc(storeView.aom.dashboard_url)}" target="_blank"><u>open Couchbase Labs Agent Operations Manager</u></a>` : ''}</div>`
+      : `<div class="sub" style="margin-top:6px">${esc(e.outcome)} · ${esc(e.resolved_by)} · ${e.governed ? `approved in Couchbase Labs Agent Operations Manager, trace ${esc(e.trace_id || '')}` : 'settled at the store'}</div>`;
     return `<div class="exc ${e.status === 'resolved' ? 'done' : ''}"><div class="rowx"><b>${title}</b><span class="tag ${e.status === 'resolved' ? 'ok' : 'red'}">${e.status.replace('_', ' ')}</span></div>
       <div style="margin-top:6px;font-size:13px">${body}</div><div class="sub" style="margin-top:6px">${esc(e.evidence)}</div>${btns}</div>`;
   }).join('') || '<div class="sub" style="padding-top:10px">No exceptions on this kiosk.</div>';

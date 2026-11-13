@@ -77,12 +77,12 @@ export default function Profile() {
         <Text style={styles.tiny}>Your own channel carries your profile, recommendations, orders and assistant history. Your home store's channel carries its aisle map, and the catalog channel is shared by every shopper.</Text>
       </Card>
 
-      <SectionTitle title="Agent Operations Manager" />
+      <SectionTitle title="Couchbase Labs Agent Operations Manager" />
       <Card style={{ padding: 16, gap: 8 }}>
         <Text style={styles.meta}>
           Every order, price match, subscription, return and preference change becomes a request that the Shopping Assistant agent runs
-          through Couchbase AOM: RBAC and tool scope, human approval for price matches and goodwill credits, a trace and an audit entry.
-          Assistant answers use AOM's Knowledge Base, Context Cache, memory and LLM cache.
+          through Couchbase Labs Agent Operations Manager: RBAC and tool scope, human approval for price matches and goodwill credits, a trace and an audit entry.
+          Assistant answers use Couchbase Labs Agent Operations Manager's Knowledge Base, Context Cache, memory and LLM cache.
         </Text>
         <Row icon="link-outline" label="Backend" value={API_URL} />
         <Row icon="finger-print-outline" label="Shopper ID" value={session?.shopper_id ?? '—'} />

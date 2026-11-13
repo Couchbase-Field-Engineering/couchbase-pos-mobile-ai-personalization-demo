@@ -80,12 +80,12 @@ function SidePanel() {
       <Text style={styles.panelBody}>
         Every screen renders from the shopper's on-device database, loaded once a night from the Databricks
         personalization export. Orders are captured offline and synced back; the assistant is governed by the
-        Couchbase Agent Operations Manager.
+        Couchbase Labs Agent Operations Manager.
       </Text>
       {[
         ['phone-portrait-outline', 'Couchbase Lite', 'Offline-first: browse, price and check out in a subway tunnel'],
         ['analytics-outline', 'Databricks offload', 'One nightly export; no warehouse query per screen'],
-        ['shield-checkmark-outline', 'Governed actions', 'Orders, price matches and credits run as audited AOM tool calls'],
+        ['shield-checkmark-outline', 'Governed actions', 'Orders, price matches and credits run as audited Couchbase Labs Agent Operations Manager tool calls'],
       ].map(([icon, title, body]) => (
         <View key={title} style={styles.point}>
           <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color={theme.color.red} />

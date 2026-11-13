@@ -1,0 +1,23 @@
+Couchbase ShopSmart POS demo is deploying to namespace {{ .Release.Namespace }}.
+
+First start takes a few minutes: Couchbase initializes, today's mock Databricks
+export ({{ .Values.dump.targetMb }} MiB) is generated, loaded into Couchbase{{ if .Values.aom.enabled }}, and the
+backend registers itself with AOM and publishes the Knowledge Base{{ end }}.
+
+  kubectl -n {{ .Release.Namespace }} get pods -w
+  kubectl -n {{ .Release.Namespace }} logs deploy/backend -f
+
+The story (start here): https://{{ .Values.publicHost }}:{{ .Values.web.service.port }}/story
+The app in a browser:   https://{{ .Values.publicHost }}:{{ .Values.web.service.port }}
+                        (sign in as {{ .Values.web.auth.username }} / {{ .Values.web.auth.password }}; self-signed certificate unless web.tls.secretName is set)
+Voice ordering:         https://{{ .Values.publicHost }}:{{ .Values.web.service.port }}/lane
+Self-checkout:          https://{{ .Values.publicHost }}:{{ .Values.web.service.port }}/checkout
+Backend status:         http://{{ .Values.publicHost }}:{{ .Values.backend.service.port }}/api/status
+Couchbase Lite (phones): ws://{{ .Values.publicHost }}:{{ .Values.syncGateway.service.port }}/{{ .Values.syncGateway.database }}
+Couchbase Web Console:  kubectl -n {{ .Release.Namespace }} port-forward svc/couchbase 18091:8091
+                        (Administrator / kubectl -n {{ .Release.Namespace }} get secret pos-app-secrets -o jsonpath='{.data.COUCHBASE_PASSWORD}' | base64 -d)
+{{- if .Values.aom.enabled }}
+
+AOM: {{ .Values.aom.url }}
+  Registration progress: /api/status -> aom.registration (and aom.rag_app)
+{{- end }}

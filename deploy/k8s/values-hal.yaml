@@ -1,0 +1,23 @@
+# pos-app on "hal" (single-node K3s, managed by Rancher) at 192.168.111.5.
+# Secrets (the AOM admin password) are NOT kept here - deploy.sh writes them to
+# a mode-600 values file on hal instead.
+publicHost: "192.168.111.5"
+# hal publishes LoadBalancer Services through K3s ServiceLB (svclb pods), so no
+# externalIPs are needed. If a Service stays <pending>, set them to ["192.168.111.5"].
+externalIPs: []
+
+aom:
+  enabled: true
+  # The agent-ops release already running on hal (namespace agent-ops).
+  url: https://aom-operations-manager.agent-ops.svc.cluster.local:8090
+  # The AOM dashboard as a browser reaches it - linked from the story page.
+  dashboardUrl: https://45.52.200.223:3111
+
+# Published ports on hal. Change them if another demo already holds one
+# (kubectl get svc -A | grep LoadBalancer shows what is taken).
+web:
+  service: { type: LoadBalancer, port: 5154 }
+backend:
+  service: { type: LoadBalancer, port: 8204 }
+syncGateway:
+  service: { type: LoadBalancer, port: 4992 }

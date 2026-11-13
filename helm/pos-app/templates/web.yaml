@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- include "pos.selector" "web" | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "pos.selector" "web" | nindent 8 }}
+    spec:
+      containers:
+        - name: web
+          image: {{ include "pos.image" (dict "root" . "image" .Values.web.image) }}
+          imagePullPolicy: {{ .Values.web.image.pullPolicy }}
+          ports:
+            - { name: https, containerPort: 443 }
+          env:
+            - { name: DEMO_USERNAME, value: {{ .Values.web.auth.username | quote }} }
+            - { name: DEMO_PASSWORD, value: {{ .Values.web.auth.password | quote }} }
+            - { name: TLS_HOSTS, value: {{ join "," (compact (concat (list .Values.publicHost) .Values.web.tls.hosts)) | quote }} }
+          readinessProbe:
+            httpGet: { path: /healthz, port: https, scheme: HTTPS }
+          {{- with .Values.web.tls.secretName }}
+          volumeMounts:
+            - { name: tls, mountPath: /etc/nginx/tls, readOnly: true }
+          {{- end }}
+          resources: {{- toYaml .Values.web.resources | nindent 12 }}
+      {{- with .Values.web.tls.secretName }}
+      volumes:
+        - name: tls
+          secret: { secretName: {{ . | quote }} }
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.web.service.type }}
+  {{- with .Values.externalIPs }}
+  externalIPs: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector: {{- include "pos.selector" "web" | nindent 4 }}
+  ports:
+    - { name: https, port: {{ .Values.web.service.port }}, targetPort: https }

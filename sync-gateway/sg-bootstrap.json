@@ -1,0 +1,20 @@
+{
+  "bootstrap": {
+    "server": "couchbase://couchbase",
+    "username": "Administrator",
+    "password": "password123",
+    "use_tls_server": false
+  },
+  "api": {
+    "public_interface": ":4984",
+    "admin_interface": ":4985",
+    "metrics_interface": ":4986",
+    "admin_interface_authentication": true
+  },
+  "logging": {
+    "console": {
+      "log_level": "info",
+      "log_keys": ["HTTP", "Sync", "Import", "CRUD"]
+    }
+  }
+}

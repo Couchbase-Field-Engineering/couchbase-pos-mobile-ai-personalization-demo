@@ -1,0 +1,135 @@
+# Couchbase ShopSmart POS mobile AI personalization demo
+#
+#   couchbase       Couchbase Server Enterprise 8.0.2 (developer/free license for dev & test)
+#   couchbase-init  one-shot: bucket `pos`, scope `retail`, collections, indexes
+#   sync-gateway    Sync Gateway 4.0 Enterprise (required by Couchbase Lite 4.x) - replicates to Couchbase Lite on the phone
+#   sg-init         one-shot: creates the `pos` SG database (sync functions per collection)
+#   backend         FastAPI + the `shopsmart-pos` MCP server, the daily-export loader, the voice
+#                   ordering and self-checkout vision agents, and the offline-first order
+#                   worker                                (http://localhost:8204)
+#   web             the app in a browser                  (https://localhost:5154), voice ordering
+#                   (/lane), self-checkout (/checkout), the merchandising console (/merch)
+#
+# The Couchbase Agent Operations Manager runs as its own compose stack on the same
+# machine; the backend reaches it at https://host.docker.internal:8090 and AOM reaches
+# the backend's MCP server at http://host.docker.internal:8204/pos/mcp.
+# Host ports are chosen to avoid AOM (8090, 8091-8096), the NOV demo (9091/9093, 4000, 8080)
+# the cruise demos (8081/8082, 8200/8201, 4984-4986, 18091), the field sales demo
+# (8083, 8202, 4988/4989, 18093) and the ShopSmart app demo (5151, 8203, 4990/4991, 18094).
+
+services:
+  couchbase:
+    image: couchbase:enterprise-8.0.2
+    container_name: pos-couchbase
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18095:8091"   # Web Console: http://localhost:18095 (Administrator / password123)
+    volumes:
+      - couchbase-data:/opt/couchbase/var
+    healthcheck:
+      # No -f: this Couchbase version answers /pools with 401 as soon as it is up.
+      test: ["CMD", "curl", "-s", "-o", "/dev/null", "http://localhost:8091/pools"]
+      interval: 10s
+      timeout: 5s
+      start_period: 90s
+      retries: 40
+
+  couchbase-init:
+    image: couchbase:enterprise-8.0.2
+    container_name: pos-couchbase-init
+    depends_on:
+      couchbase:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "/init/init.sh"]
+    environment:
+      CB_HOST: couchbase
+      CB_USERNAME: Administrator
+      CB_PASSWORD: password123
+    volumes:
+      - ./couchbase-init:/init:ro
+    restart: "no"
+
+  sync-gateway:
+    image: couchbase/sync-gateway:4.0.4-enterprise
+    container_name: pos-sync-gateway
+    restart: unless-stopped
+    depends_on:
+      couchbase-init:
+        condition: service_completed_successfully
+    command: ["/etc/sync_gateway/sg-bootstrap.json"]
+    volumes:
+      - ./sync-gateway/sg-bootstrap.json:/etc/sync_gateway/sg-bootstrap.json:ro
+    ports:
+      - "4992:4984"              # public REST / replication: ws://<your-mac-ip>:4992/pos
+      - "127.0.0.1:4993:4985"    # admin API - localhost only
+
+  sg-init:
+    image: curlimages/curl:8.11.1
+    container_name: pos-sg-init
+    depends_on:
+      - sync-gateway
+    entrypoint: ["/bin/sh", "/sg/sg-init.sh"]
+    environment:
+      SG_ADMIN_URL: http://sync-gateway:4985
+    volumes:
+      - ./sync-gateway:/sg:ro
+    restart: "no"
+
+  backend:
+    build: ./backend
+    container_name: pos-backend
+    restart: unless-stopped
+    depends_on:
+      couchbase-init:
+        condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      STORE_DRIVER: couchbase
+      COUCHBASE_CONN: couchbase://couchbase
+      COUCHBASE_USERNAME: Administrator
+      COUCHBASE_PASSWORD: password123
+      DUMP_DIR: /data/databricks-dump
+      SG_ADMIN_URL: http://sync-gateway:4985
+      SG_ADMIN_USERNAME: Administrator
+      SG_ADMIN_PASSWORD: password123
+      # Linked from the story page (https://localhost:5154/story).
+      AOM_DASHBOARD_URL: ${AOM_DASHBOARD_URL:-https://localhost}
+      # Dynamic pricing: how often inventory is re-read into the pricing rules, the time zone the
+      # time-of-day promotions run on, and the hour 0-23 the pricing clock is pinned to (9 unless .env says otherwise; DEMO_HOUR= in .env means wall time).
+      PRICING_REFRESH_SECONDS: ${PRICING_REFRESH_SECONDS:-60}
+      PRICING_TZ: ${PRICING_TZ:-America/New_York}
+      DEMO_HOUR: ${DEMO_HOUR-9}
+    volumes:
+      - ./data:/data:ro
+    ports:
+      - "8204:8200"              # app API + MCP server (/pos/mcp)
+
+  web:
+    # The app in a browser: https://localhost:5154 (sign in as a demo shopper).
+    # Same screens and documents as the device build; uses the preview sync
+    # engine instead of Couchbase Lite. Rebuild after app changes:
+    #   cd mobile && npm run export:web:docker && docker compose up -d --build web
+    build: ./web
+    container_name: pos-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      # Sign-in for the browser UI (web/signin.html). Override both in .env.
+      DEMO_USERNAME: ${DEMO_USERNAME:-demo}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-Couchbase123!}
+      # Extra host names / IPs for the self-signed certificate (comma-separated),
+      # e.g. the address people use to reach this machine.
+      TLS_HOSTS: ${TLS_HOSTS:-}
+    volumes:
+      - web-tls:/etc/nginx/tls   # keeps the generated certificate across rebuilds
+    ports:
+      - "5154:443"              # HTTPS
+
+volumes:
+  web-tls:
+  couchbase-data:

@@ -1,0 +1,50 @@
+{
+  "name": "shopper_personalization_daily_export",
+  "description": "Daily export of shopper personalization (Customer 360 + next-basket model scores + competitor price watch) for the Couchbase ShopSmart mobile app. Output is picked up by the demo backend, loaded into Couchbase (synced to Couchbase Lite on shoppers' phones) and published to the Couchbase Agent Operations Manager Knowledge Base. The one scheduled run is the only Databricks compute the app uses.",
+  "schedule": {
+    "quartz_cron_expression": "0 30 4 * * ?",
+    "timezone_id": "America/New_York",
+    "pause_status": "UNPAUSED"
+  },
+  "max_concurrent_runs": 1,
+  "timeout_seconds": 5400,
+  "email_notifications": {
+    "on_failure": ["customer-data-platform@example.com"]
+  },
+  "tasks": [
+    {
+      "task_key": "export_shopper_personalization",
+      "notebook_task": {
+        "notebook_path": "/Repos/shopsmart/couchbase-pos-mobile-ai-personalization-demo/databricks/notebooks/shopper_personalization_daily_export",
+        "base_parameters": {
+          "catalog": "shopsmart_prod",
+          "schema": "customer360",
+          "export_volume": "/Volumes/shopsmart_prod/customer360/exports/shopper_personalization_daily",
+          "history_orders": "8",
+          "num_files": "4"
+        },
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "export_cluster",
+      "max_retries": 2,
+      "min_retry_interval_millis": 300000
+    }
+  ],
+  "job_clusters": [
+    {
+      "job_cluster_key": "export_cluster",
+      "new_cluster": {
+        "spark_version": "16.4.x-scala2.12",
+        "node_type_id": "i3.xlarge",
+        "num_workers": 4,
+        "data_security_mode": "SINGLE_USER",
+        "runtime_engine": "PHOTON"
+      }
+    }
+  ],
+  "tags": {
+    "team": "customer-data-platform",
+    "consumer": "shopsmart-pos-app",
+    "demo": "couchbase-aom"
+  }
+}

@@ -1,0 +1,187 @@
+{{- if and .Values.aom.enabled (not .Values.aom.adminPassword) (not .Values.aom.agentApiKey) }}
+{{- fail "aom.adminPassword is required when aom.enabled (or set aom.agentApiKey, or aom.enabled=false)" }}
+{{- end }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: databricks-dump
+  labels: {{- include "pos.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes: ["ReadWriteOnce"]
+  {{- with .Values.dump.persistence.storageClassName }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.dump.persistence.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: {{- include "pos.selector" "backend" | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "pos.selector" "backend" | nindent 8 }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      initContainers:
+        {{- include "pos.waitForCouchbase" . | nindent 8 }}
+        # First start: export today's mock Databricks partition into the volume.
+        - name: databricks-export
+          image: {{ include "pos.image" (dict "root" . "image" .Values.backend.image) }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          command: ["sh", "/scripts/dump.sh"]
+          env:
+            - { name: DUMP_TZ, value: {{ .Values.dump.daily.timeZone | quote }} }
+          volumeMounts:
+            - { name: dump, mountPath: /data }
+            - { name: scripts, mountPath: /scripts, readOnly: true }
+      containers:
+        - name: backend
+          image: {{ include "pos.image" (dict "root" . "image" .Values.backend.image) }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - { name: http, containerPort: 8200 }
+          env:
+            - { name: STORE_DRIVER, value: couchbase }
+            - { name: COUCHBASE_CONN, value: couchbase://couchbase }
+            - { name: COUCHBASE_BUCKET, value: {{ .Values.couchbase.bucket | quote }} }
+            - { name: COUCHBASE_SCOPE, value: {{ .Values.couchbase.scope | quote }} }
+            - name: COUCHBASE_USERNAME
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: COUCHBASE_USERNAME } }
+            - name: COUCHBASE_PASSWORD
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: COUCHBASE_PASSWORD } }
+            - { name: DUMP_DIR, value: /data/databricks-dump }
+            - { name: SG_ADMIN_URL, value: "http://sync-gateway:4985" }
+            - { name: SG_DB, value: {{ .Values.syncGateway.database | quote }} }
+            - { name: SG_PUBLIC_URL, value: {{ printf "ws://%s:%v/%s" .Values.publicHost .Values.syncGateway.service.port .Values.syncGateway.database | quote }} }
+            - name: SG_ADMIN_USERNAME
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: COUCHBASE_USERNAME } }
+            - name: SG_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: COUCHBASE_PASSWORD } }
+            - name: APP_SECRET
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: APP_SECRET } }
+            - { name: PRICING_TZ, value: {{ .Values.backend.pricing.tz | quote }} }
+            - { name: DEMO_HOUR, value: {{ .Values.backend.pricing.demoHour | toString | quote }} }
+            - { name: PRICING_REFRESH_SECONDS, value: {{ .Values.backend.pricing.refreshSeconds | toString | quote }} }
+            {{- if .Values.aom.enabled }}
+            - { name: AOM_URL, value: {{ .Values.aom.url | quote }} }
+            - { name: AOM_AUTO_REGISTER, value: "true" }
+            - { name: AOM_DASHBOARD_URL, value: {{ .Values.aom.dashboardUrl | quote }} }
+            - { name: AOM_ADMIN_USERNAME, value: {{ .Values.aom.adminUsername | quote }} }
+            - name: AOM_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: AOM_ADMIN_PASSWORD } }
+            - name: AOM_AGENT_API_KEY
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: AOM_AGENT_API_KEY } }
+            - { name: AOM_VERIFY_TLS, value: {{ .Values.aom.verifyTls | quote }} }
+            # How AOM (in its own namespace) reaches this backend's MCP server.
+            - { name: AOM_MCP_PUBLIC_URL, value: {{ printf "http://backend.%s.svc.cluster.local:8200/pos/mcp" .Release.Namespace | quote }} }
+            - { name: AOM_LLM_PROVIDER, value: {{ .Values.aom.llmProvider | quote }} }
+            - { name: AOM_LLM_MODEL, value: {{ .Values.aom.llmModel | quote }} }
+            {{- end }}
+            {{- range $k, $v := .Values.backend.env }}
+            - { name: {{ $k }}, value: {{ $v | quote }} }
+            {{- end }}
+            {{- with .Values.backend.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          readinessProbe:
+            httpGet: { path: /api/health, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/health, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 6
+          resources: {{- toYaml .Values.backend.resources | nindent 12 }}
+          volumeMounts:
+            - { name: dump, mountPath: /data, readOnly: true }
+      volumes:
+        - name: dump
+          persistentVolumeClaim: { claimName: databricks-dump }
+        - name: scripts
+          configMap: { name: pos-app-scripts }
+---
+# In-cluster name: the web pod's nginx proxies /api here, and AOM calls the MCP server here.
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "pos.selector" "backend" | nindent 4 }}
+  ports:
+    - { name: http, port: 8200, targetPort: http }
+{{- if .Values.backend.service.type }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-public
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.backend.service.type }}
+  {{- with .Values.externalIPs }}
+  externalIPs: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector: {{- include "pos.selector" "backend" | nindent 4 }}
+  ports:
+    - { name: http, port: {{ .Values.backend.service.port }}, targetPort: http }
+{{- end }}
+{{- if .Values.dump.daily.enabled }}
+---
+# The "daily Databricks job": a new dt= partition every morning. The backend
+# notices it within DUMP_POLL_SECONDS and reloads shoppers, recommendations and the KB.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: databricks-daily-export
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.dump.daily.schedule | quote }}
+  {{- with .Values.dump.daily.timeZone }}
+  timeZone: {{ . | quote }}
+  {{- end }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels: {{- include "pos.selector" "databricks-export" | nindent 12 }}
+        spec:
+          restartPolicy: OnFailure
+          # Same node as the backend: the dump volume is ReadWriteOnce (local-path).
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels: {{- include "pos.selector" "backend" | nindent 22 }}
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - name: export
+              image: {{ include "pos.image" (dict "root" . "image" .Values.backend.image) }}
+              imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+              command: ["sh", "/scripts/dump.sh"]
+              env:
+                - { name: DUMP_TZ, value: {{ .Values.dump.daily.timeZone | quote }} }
+              volumeMounts:
+                - { name: dump, mountPath: /data }
+                - { name: scripts, mountPath: /scripts, readOnly: true }
+          volumes:
+            - name: dump
+              persistentVolumeClaim: { claimName: databricks-dump }
+            - name: scripts
+              configMap: { name: pos-app-scripts }
+{{- end }}

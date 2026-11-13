@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync-gateway
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- include "pos.selector" "sync-gateway" | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "pos.selector" "sync-gateway" | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      initContainers:
+        {{- include "pos.waitForCouchbase" . | nindent 8 }}
+      containers:
+        - name: sync-gateway
+          image: {{ .Values.syncGateway.image }}
+          args: ["/etc/sync_gateway/sg-bootstrap.json"]
+          ports:
+            - { name: public, containerPort: 4984 }
+            - { name: admin, containerPort: 4985 }
+          readinessProbe:
+            tcpSocket: { port: 4984 }
+            periodSeconds: 10
+          resources: {{- toYaml .Values.syncGateway.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/sync_gateway/sg-bootstrap.json
+              subPath: sg-bootstrap.json
+              readOnly: true
+      volumes:
+        - name: config
+          secret: { secretName: pos-app-secrets }
+---
+# Admin API (4985) stays inside the cluster - the backend mints shopper sessions with it.
+apiVersion: v1
+kind: Service
+metadata:
+  name: sync-gateway
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "pos.selector" "sync-gateway" | nindent 4 }}
+  ports:
+    - { name: public, port: 4984, targetPort: 4984 }
+    - { name: admin, port: 4985, targetPort: 4985 }
+---
+# Public replication endpoint for Couchbase Lite: ws://<publicHost>:<port>/pos
+apiVersion: v1
+kind: Service
+metadata:
+  name: sync-gateway-public
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.syncGateway.service.type }}
+  {{- with .Values.externalIPs }}
+  externalIPs: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector: {{- include "pos.selector" "sync-gateway" | nindent 4 }}
+  ports:
+    - { name: public, port: {{ .Values.syncGateway.service.port }}, targetPort: 4984 }
+---
+# Creates (or updates) the `pos` Sync Gateway database - sync-gateway/sg-init.sh.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sg-init
+  labels: {{- include "pos.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels: {{- include "pos.selector" "sg-init" | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: sg-init
+          image: {{ .Values.curlImage }}
+          env:
+            - name: SG_ADMIN_USERNAME
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: COUCHBASE_USERNAME } }
+            - name: SG_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: COUCHBASE_PASSWORD } }
+          command:
+            - sh
+            - -c
+            - |
+              SG=http://sync-gateway:4985; AUTH="$SG_ADMIN_USERNAME:$SG_ADMIN_PASSWORD"; DB={{ .Values.syncGateway.database }}
+              echo "Waiting for the Sync Gateway admin API ..."
+              until curl -s -o /dev/null -u "$AUTH" "$SG/"; do sleep 5; done
+              for i in $(seq 1 60); do
+                code=$(curl -s -o /tmp/out -w '%{http_code}' -u "$AUTH" -X PUT "$SG/$DB/" -H 'Content-Type: application/json' --data-binary @/scripts/db-config.json)
+                case "$code" in
+                  200|201) echo "Created database $DB"; exit 0 ;;
+                  412) code=$(curl -s -o /tmp/out -w '%{http_code}' -u "$AUTH" -X PUT "$SG/$DB/_config" -H 'Content-Type: application/json' --data-binary @/scripts/db-config.json)
+                       if [ "$code" = "200" ] || [ "$code" = "201" ]; then echo "Updated database $DB"; exit 0; fi ;;
+                esac
+                echo "attempt $i: HTTP $code $(cat /tmp/out)"; sleep 5
+              done
+              exit 1
+          volumeMounts:
+            - { name: scripts, mountPath: /scripts, readOnly: true }
+      volumes:
+        - name: scripts
+          configMap: { name: pos-app-scripts }

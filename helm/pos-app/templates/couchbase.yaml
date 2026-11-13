@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchbase
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  # Headless: a stable couchbase://couchbase name for the backend, Sync Gateway and init.
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector: {{- include "pos.selector" "couchbase" | nindent 4 }}
+  ports:
+    - { name: admin, port: 8091 }
+    - { name: views, port: 8092 }
+    - { name: query, port: 8093 }
+    - { name: search, port: 8094 }
+    - { name: data, port: 11210 }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: couchbase
+  labels: {{- include "pos.labels" . | nindent 4 }}
+spec:
+  serviceName: couchbase
+  replicas: 1
+  selector:
+    matchLabels: {{- include "pos.selector" "couchbase" | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "pos.selector" "couchbase" | nindent 8 }}
+    spec:
+      containers:
+        - name: couchbase
+          image: {{ .Values.couchbase.image }}
+          ports:
+            - { name: admin, containerPort: 8091 }
+            - { name: views, containerPort: 8092 }
+            - { name: query, containerPort: 8093 }
+            - { name: search, containerPort: 8094 }
+            - { name: data, containerPort: 11210 }
+          # No `-f`: this Couchbase version answers /pools with 401 once it is up.
+          readinessProbe:
+            exec: { command: ["sh", "-c", "curl -s -o /dev/null http://localhost:8091/pools"] }
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 10
+          livenessProbe:
+            exec: { command: ["sh", "-c", "curl -s -o /dev/null http://localhost:8091/pools"] }
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 15
+          resources: {{- toYaml .Values.couchbase.resources | nindent 12 }}
+          volumeMounts:
+            - { name: data, mountPath: /opt/couchbase/var }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- with .Values.couchbase.persistence.storageClassName }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.couchbase.persistence.size }}
+---
+# Cluster, bucket, scope, collections and indexes - the same idempotent
+# couchbase-init/init.sh Docker Compose runs, as a hook Job on every install/upgrade.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: couchbase-init
+  labels: {{- include "pos.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels: {{- include "pos.selector" "couchbase-init" | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init
+          image: {{ .Values.couchbase.image }}
+          command: ["/bin/bash", "/scripts/init.sh"]
+          env:
+            - { name: CB_HOST, value: couchbase }
+            - { name: CB_BUCKET, value: {{ .Values.couchbase.bucket | quote }} }
+            - { name: CB_SCOPE, value: {{ .Values.couchbase.scope | quote }} }
+            - { name: CB_RAMSIZE, value: {{ .Values.couchbase.ramQuotaMB.data | quote }} }
+            - { name: CB_INDEX_RAMSIZE, value: {{ .Values.couchbase.ramQuotaMB.index | quote }} }
+            - { name: CB_BUCKET_RAMSIZE, value: {{ .Values.couchbase.ramQuotaMB.bucket | quote }} }
+            - name: CB_USERNAME
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: COUCHBASE_USERNAME } }
+            - name: CB_PASSWORD
+              valueFrom: { secretKeyRef: { name: pos-app-secrets, key: COUCHBASE_PASSWORD } }
+          volumeMounts:
+            - { name: scripts, mountPath: /scripts, readOnly: true }
+      volumes:
+        - name: scripts
+          configMap: { name: pos-app-scripts }

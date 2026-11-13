@@ -1,0 +1,171 @@
+# React Native — macOS + Windows
+# Official RN community template, plus Expo, OS, and editor noise.
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# --- Windows ---
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+
+# --- Editors / IDEs ---
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+.history/
+*.sublime-workspace
+*.sublime-project
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+.npm
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+*.tgz
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.p8
+*.p12
+*.key
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+credentials.json
+
+# --- React Native / Metro ---
+.metro-health-check*
+*.jsbundle
+.watchman-cookie-*
+
+# --- Expo / EAS ---
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# --- Testing ---
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+
+# --- Caches ---
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+.cache/
+.parcel-cache/
+.turbo/
+
+# --- Xcode / iOS ---
+build/
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.xcuserstate
+**/.xcode.env.local
+**/Pods/
+
+# --- Ruby / CocoaPods / Bundler ---
+.bundle/
+vendor/bundle/
+
+# --- Fastlane ---
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+**/fastlane/.env*
+
+# --- Android / Gradle ---
+.gradle/
+local.properties
+*.hprof
+.cxx/
+.kotlin/
+*.keystore
+!debug.keystore
+android/captures/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# --- Windows Visual Studio (RN Windows) ---
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+windows/*/Generated Files/
+windows/*/Bundle/
+windows/*/bundle/
+
+# --- Temporary ---
+*.orig
+*.bak
+*.tmp
+tmp/
+temp/
+
+# --- Local build slices (checklists). Keep files tiny. AGENT.md is at repo root. ---
+/work/
+
+# --- Expo prebuild (npx expo run:ios / run:android) ---
+/ios/
+/android/
+web-dist/

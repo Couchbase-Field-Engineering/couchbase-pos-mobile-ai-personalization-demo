@@ -1,0 +1,34 @@
+{
+  "bucket": "pos",
+  "scopes": {
+    "retail": {
+      "collections": {
+        "shoppers": {
+          "sync": "function (doc, oldDoc, meta) {\n  // Written only by the backend (Couchbase SDK writes, imported by SG).\n  // Phones pull these; any attempt to push one is rejected.\n  requireAdmin();\n  if (doc._deleted) { if (oldDoc && oldDoc.channels) { channel(oldDoc.channels); } return; }\n  channel(doc.channels);\n}"
+        },
+        "stores": {
+          "sync": "function (doc, oldDoc, meta) {\n  // Written only by the backend (Couchbase SDK writes, imported by SG).\n  // Phones pull these; any attempt to push one is rejected.\n  requireAdmin();\n  if (doc._deleted) { if (oldDoc && oldDoc.channels) { channel(oldDoc.channels); } return; }\n  channel(doc.channels);\n}"
+        },
+        "recommendations": {
+          "sync": "function (doc, oldDoc, meta) {\n  // Written only by the backend (Couchbase SDK writes, imported by SG).\n  // Phones pull these; any attempt to push one is rejected.\n  requireAdmin();\n  if (doc._deleted) { if (oldDoc && oldDoc.channels) { channel(oldDoc.channels); } return; }\n  channel(doc.channels);\n}"
+        },
+        "assistant": {
+          "sync": "function (doc, oldDoc, meta) {\n  // Written only by the backend (Couchbase SDK writes, imported by SG).\n  // Phones pull these; any attempt to push one is rejected.\n  requireAdmin();\n  if (doc._deleted) { if (oldDoc && oldDoc.channels) { channel(oldDoc.channels); } return; }\n  channel(doc.channels);\n}"
+        },
+        "context_cache": {
+          "sync": "function (doc, oldDoc, meta) {\n  // Written only by the backend (Couchbase SDK writes, imported by SG).\n  // Phones pull these; any attempt to push one is rejected.\n  requireAdmin();\n  if (doc._deleted) { if (oldDoc && oldDoc.channels) { channel(oldDoc.channels); } return; }\n  channel(doc.channels);\n}"
+        },
+        "catalog": {
+          "sync": "function (doc, oldDoc, meta) {\n  // Written only by the backend (Couchbase SDK writes, imported by SG).\n  // Phones pull these; any attempt to push one is rejected.\n  requireAdmin();\n  if (doc._deleted) { if (oldDoc && oldDoc.channels) { channel(oldDoc.channels); } return; }\n  channel(doc.channels);\n}"
+        },
+        "orders": {
+          "sync": "function (doc, oldDoc, meta) {\n  // Offline-first orders and shopper actions. A shopper's phone may CREATE one, as itself,\n  // as 'pending'. Only the backend (admin / import) may advance its status.\n  if (doc._deleted) { requireAdmin(); if (oldDoc) { channel(\"shopper:\" + oldDoc.shopper_id); } return; }\n  // A store ticket (drive-thru lane, phone line, self-checkout): written only by the backend for a store\n  // device. It goes to that store's devices and, for a recognized guest, to their phone.\n  if (doc.origin === \"pos\" || (oldDoc && oldDoc.origin === \"pos\")) {\n    requireAdmin();\n    if (!doc.store_id) { throw({forbidden: \"store_id is required\"}); }\n    channel(\"store:\" + doc.store_id);\n    if (doc.shopper_id) { channel(\"shopper:\" + doc.shopper_id); }\n    return;\n  }\n  if (!doc.shopper_id) { throw({forbidden: \"shopper_id is required\"}); }\n  if (oldDoc == null || oldDoc._deleted) {\n    requireUser(doc.shopper_id);\n    if (doc.type !== \"request\") { throw({forbidden: \"type must be 'request'\"}); }\n    if (doc.status !== \"pending\") { throw({forbidden: \"new orders must be 'pending'\"}); }\n    if (doc._id.indexOf(\"order::\" + doc.shopper_id + \"::\") !== 0) { throw({forbidden: \"id must be order::<shopper_id>::<uuid>\"}); }\n  } else {\n    if (oldDoc.shopper_id !== doc.shopper_id) { throw({forbidden: \"shopper_id is immutable\"}); }\n    requireAdmin();\n  }\n  channel(\"shopper:\" + doc.shopper_id);\n}"
+        }
+      }
+    }
+  },
+  "num_index_replicas": 0,
+  "enable_shared_bucket_access": true,
+  "import_docs": true,
+  "revs_limit": 50
+}

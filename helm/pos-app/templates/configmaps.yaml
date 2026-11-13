@@ -1,0 +1,34 @@
+# Copies of couchbase-init/init.sh, sync-gateway/db-config.json and
+# databricks/generate_mock_dump.py (deploy/k8s/deploy.sh refreshes chart/files/
+# from the repository before every install).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pos-app-scripts
+  labels: {{- include "pos.labels" . | nindent 4 }}
+data:
+  init.sh: |-
+{{ .Files.Get "files/init.sh" | indent 4 }}
+  db-config.json: |-
+{{ .Files.Get "files/db-config.json" | indent 4 }}
+  generate_mock_dump.py: |-
+{{ .Files.Get "files/generate_mock_dump.py" | indent 4 }}
+  dump.sh: |-
+    #!/bin/sh
+    # Writes today's dt= partition if it isn't there yet, then keeps only the
+    # newest partitions. Run on first start (init container) and daily (CronJob).
+    set -eu
+    OUT=/data/databricks-dump
+    TODAY=$(TZ="${DUMP_TZ:-UTC}" date +%Y-%m-%d)
+    mkdir -p "$OUT"
+    if [ -f "$OUT/dt=$TODAY/_SUCCESS" ] && [ "${FORCE:-0}" != "1" ]; then
+      echo "Partition dt=$TODAY already exported"
+    else
+      echo "Exporting dt=$TODAY ({{ .Values.dump.targetMb }} MiB) ..."
+      cd /srv && PYTHONPATH=/srv python /scripts/generate_mock_dump.py --export-date "$TODAY" \
+        --target-mb {{ .Values.dump.targetMb }} --parts {{ .Values.dump.parts }} --out "$OUT"
+    fi
+    ls -d "$OUT"/dt=* | sort | head -n -{{ .Values.dump.keepPartitions }} | while read -r old; do
+      echo "Removing $old"; rm -rf "$old"
+    done
+    ls -la "$OUT"

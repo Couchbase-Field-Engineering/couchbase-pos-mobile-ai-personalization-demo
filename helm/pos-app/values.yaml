@@ -1,0 +1,140 @@
+# Couchbase ShopSmart POS mobile AI personalization demo.
+#
+# Two images are built from this repository (see deploy/k8s/deploy.sh, which
+# builds them and imports them into K3s's containerd so no registry is needed):
+#   pos-backend  <- ./backend
+#   pos-web      <- ./web   (prebuilt Expo web export in web/dist.tgz)
+
+global:
+  # Prefixed to the two custom image repositories if set (e.g. a registry host).
+  imageRegistry: ""
+
+# Host name or IP that phones and browsers use to reach this cluster's
+# LoadBalancer ports. Used for the Sync Gateway URL handed to Couchbase Lite.
+publicHost: "192.168.111.4"
+
+# Node IPs to publish the public Services on through kube-proxy. Needed when
+# the cluster has no LoadBalancer implementation (K3s with ServiceLB disabled,
+# or a Rancher-provisioned cluster): the Services then answer on these IPs at
+# their own ports (5154, 8204, 4992) instead of staying <pending>.
+externalIPs: []
+
+couchbase:
+  image: couchbase:enterprise-8.0.2
+  username: Administrator
+  # Blank = generated on first install and kept across upgrades.
+  password: ""
+  bucket: pos
+  scope: retail
+  ramQuotaMB:
+    data: 1280
+    index: 512
+    bucket: 1024
+  resources:
+    requests: { cpu: 500m, memory: 2Gi }
+    limits: { cpu: "2", memory: 4Gi }
+  persistence:
+    size: 10Gi
+    storageClassName: ""
+
+syncGateway:
+  image: couchbase/sync-gateway:4.0.4-enterprise
+  database: pos
+  service:
+    # Phones replicate with ws://<publicHost>:<port>/pos
+    type: LoadBalancer
+    port: 4992
+  resources:
+    requests: { cpu: 200m, memory: 256Mi }
+    limits: { cpu: "1", memory: 1Gi }
+
+backend:
+  image:
+    repository: pos-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  # Dynamic pricing. tz: the zone time-of-day promotions run on. demoHour: pin the pricing
+  # clock to an hour 0-23 so the demo script's numbers hold ("" = wall time; the console at /merch can move it live).
+  pricing:
+    tz: America/New_York
+    demoHour: "9"
+    refreshSeconds: 60
+  # Optional outside access to the API (native app builds, /api/status, /docs).
+  # The browser app doesn't need it: the web pod proxies /api to the backend.
+  service:
+    type: LoadBalancer
+    port: 8204
+  # Blank = generated on first install and kept across upgrades.
+  appSecret: ""
+  env:
+    KB_WINDOW_DAYS: "2"
+    KB_PROFILE_LIMIT: "150"
+    DUMP_POLL_SECONDS: "300"
+    DEMO_TODAY: ""
+    # Illustrative per-query Databricks cost behind the story page's "spend avoided" counter.
+    DBX_COST_PER_QUERY_USD: "0.035"
+  extraEnv: []
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits: { cpu: "2", memory: 1536Mi }
+
+# The Couchbase Agent Operations Manager this backend registers with
+# (AOM_AUTO_REGISTER): its MCP server, the "ShopSmart POS Assistant" agent, the
+# approval tier for price matches / goodwill credits and the shopsmart-pos-assistant RAG
+# application. On a fresh AOM, adminPassword becomes AOM's admin password.
+aom:
+  enabled: true
+  # The in-cluster AOM API (the agent-ops chart with fullnameOverride: aom).
+  url: https://aom-operations-manager.agent-ops.svc.cluster.local:8090
+  adminUsername: admin
+  # Required when aom.enabled. AOM requires 12+ characters, not a common password.
+  adminPassword: ""
+  # The AOM dashboard as a browser reaches it - linked from the story page (/story).
+  dashboardUrl: ""
+  # Optional: a key for an agent you registered yourself; blank = self-register.
+  agentApiKey: ""
+  verifyTls: false
+  # Optional: pin the LLM AOM routes completions to.
+  llmProvider: ""
+  llmModel: ""
+
+# The mock Databricks export: generated into a volume on first start (about
+# a minute for 100 MiB) and again every morning by a CronJob, as the real
+# Databricks job would. The backend picks up the new partition on its own.
+dump:
+  targetMb: 100
+  parts: 4
+  keepPartitions: 2
+  persistence:
+    size: 2Gi
+    storageClassName: ""
+  daily:
+    enabled: true
+    schedule: "0 5 * * *"
+    timeZone: America/New_York
+
+web:
+  image:
+    repository: pos-web
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer
+    # HTTPS. The pod terminates TLS itself (web/demo-gate.sh, web/nginx.conf).
+    port: 5154
+  # The sign-in page in front of the app and the story page.
+  auth:
+    username: demo
+    password: "Couchbase123!"
+  tls:
+    # A kubernetes.io/tls Secret (tls.crt / tls.key) to serve. Blank = the pod
+    # generates a self-signed certificate on start.
+    secretName: ""
+    # Extra host names / IPs for the self-signed certificate (publicHost is always included).
+    hosts: []
+  resources:
+    requests: { cpu: 50m, memory: 32Mi }
+    limits: { cpu: 250m, memory: 128Mi }
+
+# Small helper image for the wait/init steps.
+curlImage: curlimages/curl:8.11.1

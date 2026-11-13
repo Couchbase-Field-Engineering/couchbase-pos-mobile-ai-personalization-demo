@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 800" width="1240" height="800" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#16357A"/>
+    </marker>
+    <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#B07F00"/>
+    </marker>
+    <marker id="aho" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0077C8"/>
+    </marker>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06112B"/><stop offset="1" stop-color="#16357A"/>
+    </linearGradient>
+    <style>
+      .t { fill:#0B1530; font-size:13px; font-weight:700 }
+      .s { fill:#5D6884; font-size:11px }
+      .h { fill:#0A1A3F; font-size:13px; font-weight:800; letter-spacing:0.6px }
+      .hw { fill:#FFFFFF; font-size:13px; font-weight:800; letter-spacing:0.6px }
+      .box { fill:#FFFFFF; stroke:#C9D2E3; stroke-width:1.2 }
+      .badge { fill:#F5B800 }
+      .bn { fill:#0A1A3F; font-size:12px; font-weight:900 }
+      .lbl { fill:#16357A; font-size:10.5px; font-weight:700 }
+    </style>
+  </defs>
+
+  <rect width="1240" height="800" fill="#FFFFFF"/>
+
+  <!-- Databricks -->
+  <rect x="20" y="50" width="230" height="250" rx="14" fill="#FFF4E8" stroke="#F0B27A"/>
+  <text x="34" y="74" class="h">DATABRICKS · DAILY 04:30 ET</text>
+  <rect x="38" y="92" width="194" height="62" rx="9" class="box"/>
+  <text x="50" y="116" class="t">Customer 360 + next-basket model</text>
+  <text x="50" y="134" class="s">shopper_personalization_daily_export</text>
+  <path d="M135,154 V190" stroke="#16357A" stroke-width="1.6" fill="none" marker-end="url(#ah)"/>
+  <ellipse cx="135" cy="200" rx="97" ry="10" fill="#FFFFFF" stroke="#C9D2E3"/>
+  <rect x="38" y="200" width="194" height="70" fill="#FFFFFF" stroke="none"/>
+  <path d="M38,200 V270 A97,10 0 0 0 232,270 V200" fill="#FFFFFF" stroke="#C9D2E3"/>
+  <text x="56" y="226" class="t">JSON Lines export</text>
+  <text x="56" y="244" class="s">part-*.json + _pricing_signals.json</text>
+  <text x="56" y="260" class="s">~100 MB · ~13k shoppers · 1 job/day</text>
+
+  <!-- Phone -->
+  <rect x="20" y="350" width="230" height="420" rx="34" fill="url(#hero)"/>
+  <rect x="100" y="362" width="70" height="8" rx="4" fill="#2B3F73"/>
+  <text x="44" y="396" class="hw">SHOPPER'S PHONE</text>
+  <rect x="40" y="410" width="190" height="104" rx="12" fill="#FFFFFF"/>
+  <text x="54" y="434" class="t">Expo / React Native</text>
+  <text x="54" y="454" class="s">Home · Shop · Cart · Orders</text>
+  <text x="54" y="470" class="s">Assistant · Account</text>
+  <text x="54" y="494" class="s" fill="#B07F00">prices + orders on device</text>
+  <path d="M135,514 V550" stroke="#F5B800" stroke-width="2" fill="none" marker-end="url(#ahg)" marker-start="url(#ahg)"/>
+  <rect x="40" y="556" width="190" height="186" rx="12" fill="#FFFFFF"/>
+  <text x="54" y="580" class="t">Couchbase Lite</text>
+  <text x="54" y="598" class="s">scope retail (same as server)</text>
+  <text x="54" y="622" class="s">shoppers · stores · recs</text>
+  <text x="54" y="638" class="s">orders (created here)</text>
+  <text x="54" y="654" class="s">assistant · context_cache</text>
+  <text x="54" y="670" class="s">catalog + pricing rules</text>
+  <text x="54" y="696" class="s" fill="#0077C8">continuous PUSH_AND_PULL</text>
+  <text x="54" y="712" class="s" fill="#0077C8">SessionAuthenticator</text>
+
+  <!-- Demo stack -->
+  <rect x="300" y="50" width="560" height="720" rx="14" fill="#F3F5F9" stroke="#C9D2E3"/>
+  <text x="316" y="74" class="h">DEMO STACK · DOCKER COMPOSE</text>
+
+  <rect x="318" y="88" width="524" height="322" rx="12" fill="#E8EEF9" stroke="#AEBFE0"/>
+  <text x="334" y="108" class="h">BACKEND · FASTAPI</text>
+  <rect x="336" y="124" width="236" height="74" rx="9" class="box"/>
+  <text x="350" y="150" class="t">Daily export loader</text>
+  <text x="350" y="168" class="s">shoppers · recs · pricing → Couchbase</text>
+  <text x="350" y="184" class="s">Shopping Guide + shopper profiles → KB</text>
+  <rect x="588" y="124" width="236" height="74" rx="9" class="box"/>
+  <text x="602" y="150" class="t">Shopping Assistant</text>
+  <text x="602" y="168" class="s">intent → Context Cache (Couchbase)</text>
+  <text x="602" y="184" class="s">→ AOM KB · memory · LLM cache</text>
+  <rect x="336" y="222" width="236" height="74" rx="9" class="box"/>
+  <text x="350" y="248" class="t">Offline-order worker</text>
+  <text x="350" y="266" class="s">pending orders → AOM tools/invoke</text>
+  <text x="350" y="282" class="s">polls approvals · writes results</text>
+  <rect x="588" y="222" width="236" height="74" rx="9" class="box"/>
+  <text x="602" y="248" class="t">MCP server</text>
+  <text x="602" y="266" class="s">shopsmart-pos · 10 tools</text>
+  <text x="602" y="282" class="s">orders · price matches · returns …</text>
+  <rect x="336" y="334" width="488" height="58" rx="9" class="box"/>
+  <text x="350" y="358" class="t">/api</text>
+  <text x="380" y="358" class="s">sign-in (mints Sync Gateway session) · assistant · status</text>
+  <text x="350" y="378" class="s">/pos/mcp  ← called only by AOM</text>
+
+  <rect x="318" y="460" width="340" height="170" rx="12" fill="#FFFFFF" stroke="#EC1218" stroke-width="1.4"/>
+  <text x="334" y="484" class="t">Couchbase Server EE</text>
+  <text x="334" y="502" class="s">bucket pos · scope retail</text>
+  <g font-size="10.5" fill="#0B1530">
+    <rect x="334" y="514" width="70" height="20" rx="10" fill="#FDE8E9"/><text x="344" y="528">shoppers</text>
+    <rect x="410" y="514" width="54" height="20" rx="10" fill="#FDE8E9"/><text x="421" y="528">stores</text>
+    <rect x="470" y="514" width="112" height="20" rx="10" fill="#FDE8E9"/><text x="480" y="528">recommendations</text>
+    <rect x="588" y="514" width="56" height="20" rx="10" fill="#FDE8E9"/><text x="598" y="528">orders</text>
+    <rect x="334" y="540" width="76" height="20" rx="10" fill="#FDE8E9"/><text x="342" y="554">assistant</text>
+    <rect x="416" y="540" width="96" height="20" rx="10" fill="#FFF4D1"/><text x="424" y="554">context_cache</text>
+    <rect x="518" y="540" width="66" height="20" rx="10" fill="#FDE8E9"/><text x="527" y="554">catalog</text>
+    <rect x="334" y="566" width="76" height="20" rx="10" fill="#EEF0F4"/><text x="343" y="580">inventory</text>
+    <rect x="416" y="566" width="66" height="20" rx="10" fill="#EEF0F4"/><text x="425" y="580">lookups</text>
+  </g>
+  <text x="334" y="612" class="s">grey = server only · rest replicate to the phone</text>
+
+  <rect x="318" y="680" width="340" height="74" rx="12" fill="#FFFFFF" stroke="#EC1218" stroke-width="1.4"/>
+  <text x="334" y="704" class="t">Sync Gateway 4.0</text>
+  <text x="334" y="722" class="s">channels shopper:&lt;id&gt; + store:&lt;id&gt; + fc:&lt;fc&gt; + catalog</text>
+  <text x="334" y="738" class="s">sync fn: phone may only create its own pending orders</text>
+
+  <!-- AOM -->
+  <rect x="900" y="50" width="320" height="540" rx="14" fill="#F1ECFB" stroke="#B9A6E4"/>
+  <text x="916" y="74" class="h">AGENT OPERATIONS MANAGER</text>
+  <rect x="918" y="90" width="284" height="62" rx="9" class="box"/>
+  <text x="932" y="114" class="t">Agent: ShopSmart POS Assistant</text>
+  <text x="932" y="132" class="s">role sales_agent · 10 scoped tools</text>
+  <rect x="918" y="168" width="284" height="66" rx="9" class="box"/>
+  <text x="932" y="192" class="t">Knowledge Base</text>
+  <text x="932" y="210" class="s">Shopping Guide + per-shopper profile docs</text>
+  <text x="932" y="225" class="s">RBAC + vector search, document_id-scoped</text>
+  <rect x="918" y="250" width="284" height="56" rx="9" class="box"/>
+  <text x="932" y="274" class="t">Agent Memory</text>
+  <text x="932" y="292" class="s">what each shopper has told the assistant</text>
+  <rect x="918" y="322" width="284" height="66" rx="9" class="box"/>
+  <text x="932" y="346" class="t">LLM Caching gateway</text>
+  <text x="932" y="364" class="s">exact + semantic hits · per namespace</text>
+  <text x="932" y="379" class="s">tokens + cost saved dashboard</text>
+  <rect x="918" y="404" width="284" height="92" rx="9" class="box"/>
+  <text x="932" y="428" class="t">Tool catalog · RBAC · scope</text>
+  <text x="932" y="446" class="s">human approval tier (price matches, goodwill credits)</text>
+  <text x="932" y="462" class="s">traces · audit log · hijack / drift detection</text>
+  <text x="932" y="478" class="s">guardrails · rate limits</text>
+  <rect x="918" y="512" width="284" height="60" rx="9" fill="#FFFFFF" stroke="#B9A6E4" stroke-dasharray="4 3"/>
+  <text x="932" y="536" class="t">Approvals page</text>
+  <text x="932" y="554" class="s">Customer Care approves / denies held calls</text>
+
+  <rect x="918" y="680" width="284" height="74" rx="12" fill="#FFFFFF" stroke="#C9D2E3"/>
+  <text x="932" y="706" class="t">LLM provider</text>
+  <text x="932" y="724" class="s">Gemini · Claude · OpenAI</text>
+  <text x="932" y="740" class="s">called only on an LLM-cache miss</text>
+
+  <!-- ===== flows ===== -->
+  <!-- 1 dump -> loader -->
+  <path d="M232,236 C285,236 285,160 334,160" stroke="#16357A" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+  <!-- 2 backend <-> couchbase -->
+  <path d="M488,412 V456" stroke="#16357A" stroke-width="2.2" fill="none" marker-end="url(#ah)" marker-start="url(#ah)"/>
+  <text x="496" y="440" class="lbl">KV · SQL++</text>
+  <!-- 3 loader -> KB (routed above the inner boxes) -->
+  <path d="M454,124 V82 H880 V200 H914" stroke="#7A4FC9" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+  <!-- 4 phone -> api -->
+  <path d="M230,452 C290,452 290,362 334,362" stroke="#16357A" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+  <!-- 5 CBL <-> SG <-> Couchbase -->
+  <path d="M230,700 C275,700 280,716 314,716" stroke="#0077C8" stroke-width="2.4" fill="none" marker-end="url(#aho)" marker-start="url(#aho)"/>
+  <path d="M488,634 V676" stroke="#0077C8" stroke-width="2.4" fill="none" marker-end="url(#aho)" marker-start="url(#aho)"/>
+  <!-- 6 concierge -> KB / memory / LLM cache -->
+  <path d="M826,170 H866 V276 H914" stroke="#7A4FC9" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+  <path d="M866,212 H914" stroke="#7A4FC9" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+  <path d="M866,276 V354 H914" stroke="#7A4FC9" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+  <!-- 7 LLM cache -> provider -->
+  <path d="M1204,354 H1226 V716 H1206" stroke="#16357A" stroke-width="1.6" fill="none" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+  <!-- 9 worker -> tools/invoke -->
+  <path d="M454,298 V314 H876 V440 H914" stroke="#B07F00" stroke-width="2" fill="none" marker-end="url(#ahg)"/>
+  <!-- 10 AOM -> MCP server -->
+  <path d="M914,470 H886 V259 H828" stroke="#B07F00" stroke-width="2" fill="none" marker-end="url(#ahg)"/>
+
+  <!-- badges -->
+  <g>
+    <circle cx="282" cy="198" r="11" class="badge"/><text x="278" y="202" class="bn">1</text>
+    <circle cx="470" cy="434" r="11" class="badge"/><text x="466" y="438" class="bn">2</text>
+    <circle cx="700" cy="82" r="11" class="badge"/><text x="696" y="86" class="bn">3</text>
+    <circle cx="283" cy="408" r="11" class="badge"/><text x="279" y="412" class="bn">4</text>
+    <circle cx="272" cy="704" r="11" class="badge"/><text x="268" y="708" class="bn">5</text>
+    <circle cx="866" cy="244" r="11" class="badge"/><text x="862" y="248" class="bn">6</text>
+    <circle cx="1226" cy="540" r="11" class="badge"/><text x="1222" y="544" class="bn">7</text>
+    <circle cx="510" cy="655" r="11" class="badge"/><text x="506" y="659" class="bn">8</text>
+    <circle cx="660" cy="314" r="11" class="badge"/><text x="656" y="318" class="bn">9</text>
+    <circle cx="886" cy="420" r="13" class="badge"/><text x="878" y="424" class="bn">10</text>
+  </g>
+</svg>

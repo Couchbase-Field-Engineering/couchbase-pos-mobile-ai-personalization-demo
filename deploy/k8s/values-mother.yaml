@@ -1,0 +1,26 @@
+# pos-app on "mother" (single-node K3s, managed by Rancher) at 192.168.111.4.
+# Secrets (the AOM admin password) are NOT kept here - deploy.sh writes them to
+# a mode-600 values file on mother instead.
+publicHost: "192.168.111.4"
+# mother has no working LoadBalancer (ServiceLB), so publish on the node IP directly.
+externalIPs: ["192.168.111.4"]
+
+aom:
+  enabled: true
+  # The agent-ops release (fullnameOverride: aom) in namespace agent-ops.
+  url: https://aom-operations-manager.agent-ops.svc.cluster.local:8090
+  # Linked from the story page.
+  dashboardUrl: https://192.168.111.4:3111
+
+# K3s's ServiceLB (Klipper) binds each LoadBalancer port on the node's IP.
+# The Royal Caribbean (royal-app: 8081 / 8200 / 4984), Princess (princess-app:
+# 8082 / 8201 / 4986) and field sales (8083 / 8202 / 4988) demos already hold
+# their ports on mother, so this demo publishes:
+#   5154 the app (HTTPS, behind the sign-in page), 8204 the backend API, 4992 Sync Gateway (Couchbase Lite).
+# AOM's dashboard is on 3111 (agent-ops chart, values-k3s.yaml).
+web:
+  service: { type: LoadBalancer, port: 5154 }
+backend:
+  service: { type: LoadBalancer, port: 8204 }
+syncGateway:
+  service: { type: LoadBalancer, port: 4992 }

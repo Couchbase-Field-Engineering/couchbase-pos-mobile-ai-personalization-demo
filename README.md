@@ -7,7 +7,7 @@ It covers the retail use case **personalized customer experience and smart merch
 * **Voice ordering.** The *voice ordering agent* takes orders at the drive-thru speaker and on the store's phone line. It understands the order on the store edge (a grammar over the menu and the catalog, with an LLM behind AOM's gateway only for what the grammar can't read), recognizes the guest (app check-in, caller ID or a spoken member number), offers their usual at their member price, and makes one merchandising offer per turn: finish the combo, the batch the kitchen overbaked, a larger size, or the item the nightly model says they are about to run out of at home.
 * **Self-service automation.** The *self-checkout vision agent* turns each camera frame into a vector and finds the item with a vector search over reference vectors held on the kiosk. A clear match is rung up with no scan. Lookalikes are settled by the bagging scale, or by asking the guest. A barcode that disagrees with what the camera and the scale both see, or an item that reaches the bag unscanned, pauses checkout for the attendant, whose decision goes through AOM's human-approval tier.
 
-It is built on the framework of the [ShopSmart mobile AI personalization demo](../couchbase-shopsmart-mobile-ai-personalization-demo) and keeps everything that demo does: the guest's phone app on **Couchbase Lite**, the **daily Databricks export** as the only Databricks compute, targeted recommendations, dynamic pricing and bundling, and an assistant governed by the **Couchbase Agent Operations Manager (AOM)**. The store and the phone share one data plane, so an order taken at the lane shows up in the guest's app, comes off their store credit, and takes what they just bought out of their smart cart.
+It also has the guest's phone app on **Couchbase Lite**, the **daily Databricks export** as the only Databricks compute, targeted recommendations, dynamic pricing and bundling, and an assistant governed by the **Couchbase Agent Operations Manager (AOM)**. The store and the phone share one data plane, so an order taken at the lane shows up in the guest's app, comes off their store credit, and takes what they just bought out of their smart cart.
 
 Three agents are **registered with, and governed by, AOM**, each with its own identity, API key and tool scope:
 
@@ -18,8 +18,6 @@ Three agents are **registered with, and governed by, AOM**, each with its own id
 | **ShopSmart POS Self-Checkout Vision Agent** | Self-checkout kiosks | `identify_guest`, `place_pos_order`, `resolve_checkout_exception` (approval required) |
 
 For the assistant, AOM also provides the **Knowledge Base** (the Shopping Guide and one profile document per shopper), a **RAG Application** (`shopsmart-pos-assistant`), the **Context Cache** and **LLM Caching**. Every order, price match, subscription, return, goodwill credit, store order and self-checkout exception runs as an RBAC-checked, traced and audited AOM tool call, with human approval for price matches, goodwill credits and checkout exceptions.
-
-The app and the consoles have the look of couchbase.com - Couchbase red on white, near-black type and dark panels - and carry the Couchbase logo.
 
 There is no camera and no lane microphone in this repository. The kiosk page says which item was placed and how well the camera could see it, and the decision pipeline runs from there; the lane page uses the browser's speech recognition (or the keyboard) and the agent starts from the transcript. See [Notes](#notes).
 

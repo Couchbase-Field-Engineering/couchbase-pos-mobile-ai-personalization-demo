@@ -1,4 +1,5 @@
 # Couchbase ShopSmart POS · Mobile AI Personalization on Couchbase
+<img width="1440" height="1080" alt="image" src="https://github.com/user-attachments/assets/13769290-c037-4f99-8960-7742354d71f4" />
 
 The store side of **Couchbase ShopSmart**, a fictional retailer: a drive-thru lane and a phone line that take spoken orders, and self-checkout kiosks that recognize what a guest puts down. Each is run by an AI agent, and each agent works from documents the store already holds - the catalog, the café menu, today's pricing rules, and every guest's profile and recommendations - so the lane greets a regular with their usual, the kiosk rings up an item with no barcode, and **the store keeps selling when its WAN link is down**.
 

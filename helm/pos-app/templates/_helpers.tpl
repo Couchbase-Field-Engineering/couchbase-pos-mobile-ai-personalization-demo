@@ -37,8 +37,13 @@ app.kubernetes.io/component: {{ . }}
     - -c
     - |
       echo "Waiting for bucket {{ .Values.couchbase.bucket }} and its indexes ..."
-      until curl -s -u "$CB_USERNAME:$CB_PASSWORD" http://couchbase:8093/query/service \
-          --data-urlencode "statement=SELECT RAW COUNT(*) FROM system:indexes WHERE bucket_id='{{ .Values.couchbase.bucket }}' AND state='online'" \
+      # After a Couchbase restart the query service lists no indexes for a
+      # bucket until something queries it, so with nothing else running this
+      # count would stay at 0 forever. Query one of the demo's collections
+      # first (the result does not matter), then count this scope's indexes.
+      q() { curl -s -u "$CB_USERNAME:$CB_PASSWORD" http://couchbase:8093/query/service --data-urlencode "statement=$1"; }
+      until q "SELECT RAW 1 FROM \`{{ .Values.couchbase.bucket }}\`.\`{{ .Values.couchbase.scope }}\`.\`lookups\` LIMIT 1" >/dev/null 2>&1; \
+          q "SELECT RAW COUNT(*) FROM system:indexes WHERE bucket_id='{{ .Values.couchbase.bucket }}' AND scope_id='{{ .Values.couchbase.scope }}' AND state='online'" \
           | tr -d ' \n' | grep -Eq '"results":\[(1[2-9]|[2-9][0-9])\]'; do sleep 5; done
       echo "Couchbase is ready"
 {{- end -}}
